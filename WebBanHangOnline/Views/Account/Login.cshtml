@@ -1,0 +1,85 @@
+﻿@model LoginViewModel
+@{
+    // Trang này sẽ không sử dụng layout chung để tránh xung đột CSS
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - FoodShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style cho thông báo lỗi của ASP.NET Core */
+        .field-validation-error {
+            color: #ef4444; /* text-red-500 */
+            font-size: 0.75rem; /* text-xs */
+            margin-top: 0.25rem;
+        }
+
+        .validation-summary-errors ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .validation-summary-errors li {
+            color: #ef4444;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-8">
+        <div class="text-center mb-4">
+            <a asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-leaf fa-2x text-green-600"></i>
+                <span class="text-green-700 font-semibold ml-2 text-xl align-middle">FoodShop</span>
+            </a>
+        </div>
+        <h2 class="text-center font-semibold text-xl sm:text-2xl mb-2">Đăng nhập tài khoản</h2>
+        <p class="text-center text-sm text-gray-600 mb-6">Chào mừng trở lại! Vui lòng nhập thông tin của bạn</p>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-center text-sm mb-4"></div>
+
+            <div class="mb-4">
+                <label asp-for="Username" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                <input asp-for="Username" placeholder="Nhập tên đăng nhập của bạn" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-600" />
+                <span asp-validation-for="Username"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Password" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                <input asp-for="Password" placeholder="Nhập mật khẩu của bạn" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-600" />
+                <span asp-validation-for="Password"></span>
+            </div>
+
+            <div class="flex items-center justify-between mb-6 text-sm">
+                <div class="flex items-center">
+                    <input asp-for="RememberMe" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                    <label asp-for="RememberMe" class="ml-2 block text-gray-900"></label>
+                </div>
+                <a href="#" class="font-medium text-green-600 hover:text-green-500">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="w-full bg-green-600 text-white text-sm font-semibold py-2.5 rounded-md hover:bg-green-700 transition">
+                <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-700 mt-6">
+            Chưa có tài khoản?
+            <a asp-controller="Account" asp-action="Register" class="text-green-600 underline font-medium">Tạo tài khoản mới</a>
+        </p>
+    </div>
+</body>
+</html>

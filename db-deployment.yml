@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: webbanhang-db
+spec:
+  serviceName: "webbanhang-db-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webbanhang-db
+  template:
+    metadata:
+      labels:
+        app: webbanhang-db
+    spec:
+      containers:
+      - name: mssql
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+        - containerPort: 1433
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webbanhang-secrets
+              key: sa_password
+        volumeMounts:
+        - name: mssql-storage
+          mountPath: /var/opt/mssql
+  volumeClaimTemplates:
+  - metadata:
+      name: mssql-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webbanhang-db-service
+spec:
+  selector:
+    app: webbanhang-db
+  ports:
+  - protocol: TCP
+    port: 1433
+    targetPort: 1433

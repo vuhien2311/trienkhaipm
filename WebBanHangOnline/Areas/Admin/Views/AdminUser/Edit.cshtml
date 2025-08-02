@@ -1,0 +1,54 @@
+﻿@model EditUserViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa người dùng";
+}
+
+<div class="max-w-4xl mx-auto">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+        <p class="text-sm text-gray-600 mt-1">Cập nhật thông tin và vai trò cho người dùng: <strong>@Model.UserName</strong></p>
+    </div>
+
+    <form asp-action="Edit" method="post" class="mt-6 bg-white p-6 rounded-lg shadow">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+        <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4 text-sm"></div>
+
+        <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
+                    <input asp-for="UserName" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm p-2" readonly />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input asp-for="Email" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm p-2" readonly />
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Họ và tên</label>
+                <input asp-for="FullName" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm p-2" readonly />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Vai trò</label>
+                <div class="mt-2 space-y-2">
+                    @foreach (var role in Model.AllRoles)
+                    {
+                        <div class="flex items-center">
+                            <input type="checkbox" name="UserRoles" value="@role.Value" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" checked="@Model.UserRoles.Contains(role.Value)" />
+                            <label for="@role.Value" class="ml-3 block text-sm text-gray-900">@role.Text</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+            <a asp-action="Index" class="text-sm border border-gray-300 rounded-md px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Hủy bỏ</a>
+            <button type="submit" class="text-sm bg-green-600 text-white font-semibold rounded-md px-4 py-2 hover:bg-green-700 transition flex items-center gap-2">
+                <i class="fas fa-save"></i>
+                <span>Cập nhật vai trò</span>
+            </button>
+        </div>
+    </form>
+</div>

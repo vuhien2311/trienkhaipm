@@ -1,0 +1,70 @@
+﻿@model IEnumerable<Product>
+@using Microsoft.AspNetCore.Identity
+@using WebBanHangOnline.Models
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>@ViewData["Title"] - FoodShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <section class="mb-6">
+            <h3 class="text-gray-800 text-lg font-semibold mb-4">
+                Sản phẩm nổi bật
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var product in Model)
+                    {
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition hover:shadow-xl">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+                                <img alt="@product.Name" class="w-full h-40 object-cover" src="@(string.IsNullOrEmpty(product.ImageUrl) ? "https://placehold.co/600x400/EFEFEF/AAAAAA?text=Ảnh" : product.ImageUrl)" />
+                            </a>
+                            <div class="p-3">
+                                <h4 class="text-sm sm:text-base font-semibold text-gray-900 mb-1 truncate">
+                                    @product.Name
+                                </h4>
+                                <p class="text-gray-500 text-xs sm:text-sm mb-2">
+                                    @product.Category.Name
+                                </p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm sm:text-base font-semibold text-green-600">
+                                        @product.Price.ToString("N0")đ
+                                    </span>
+                                    <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@product.Id" aria-label="Add @product.Name to cart" class="p-2 rounded-full text-green-600 hover:bg-green-600 hover:text-white transition">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="col-span-4 text-center text-gray-500">Không có sản phẩm nào để hiển thị.</p>
+                }
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+}
+
+<div class="container mx-auto">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Tất cả sản phẩm</h1>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            @foreach (var product in Model)
+            {
+                <div class="bg-white rounded-lg shadow-md overflow-hidden group">
+                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="block">
+                        <img src="@(string.IsNullOrEmpty(product.ImageUrl) ? "https://placehold.co/300x300/EFEFEF/AAAAAA?text=Ảnh" : product.ImageUrl)"
+                             alt="@product.Name"
+                             class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity" />
+                    </a>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 truncate">@product.Name</h3>
+                        <p class="text-sm text-gray-500 mb-2">@product.Category.Name</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold text-green-600">@product.Price.ToString("N0")đ</span>
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id"
+                               class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-600 hover:text-white transition">
+                                Thêm vào giỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-gray-500">Không có sản phẩm nào để hiển thị.</p>
+    }
+</div>

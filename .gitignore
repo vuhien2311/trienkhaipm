@@ -1,0 +1,19 @@
+# Nội dung file .gitignore cho .NET
+[Bb]in/
+[Oo]bj/
+
+# Files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.*.swp
+
+# Rider
+.idea/
+
+# User-specific
+*.DotSettings.user

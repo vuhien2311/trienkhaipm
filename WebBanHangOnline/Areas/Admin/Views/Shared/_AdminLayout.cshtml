@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản trị FoodShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #111827; /* Tailwind gray-900 */
+        }
+
+        .main-content {
+            flex-grow: 1;
+            background-color: #F9FAFB; /* Tailwind gray-50 */
+        }
+
+        /* Kiểu cho link menu đang được chọn */
+        .sidebar-link.active {
+            background-color: #374151; /* Tailwind gray-700 */
+            color: #ffffff; /* white */
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="sidebar text-white flex flex-col flex-shrink-0">
+        <!-- Logo -->
+        <div class="flex items-center justify-center h-16 border-b border-gray-700">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Dashboard" class="text-white no-underline flex items-center gap-2">
+                <i class="fa-solid fa-crown text-xl"></i>
+                <span class="text-lg font-semibold">Admin Panel</span>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav id="sidebar-menu" class="flex-1 px-4 py-4 space-y-2">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Dashboard" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-tachometer-alt w-5 mr-3"></i>
+                <span>Tổng quan</span>
+            </a>
+            <a asp-area="Admin" asp-controller="AdminCategory" asp-action="Index" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-tags w-5 mr-3"></i>
+                <span>Danh mục</span>
+            </a>
+            <a asp-area="Admin" asp-controller="AdminProduct" asp-action="Index" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-box-open w-5 mr-3"></i>
+                <span>Sản phẩm</span>
+            </a>
+            <a asp-area="Admin" asp-controller="AdminOrder" asp-action="Index" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-receipt w-5 mr-3"></i>
+                <span>Đơn hàng</span>
+            </a>
+            <a asp-area="Admin" asp-controller="AdminUser" asp-action="Index" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-users w-5 mr-3"></i>
+                <span>Người dùng</span>
+            </a>
+        </nav>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-gray-700">
+            <a asp-area="" asp-controller="Home" asp-action="Index" target="_blank" class="sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <i class="fa-solid fa-globe w-5 mr-3"></i>
+                <span>Xem trang web</span>
+            </a>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+                <button type="submit" class="w-full sidebar-link flex items-center px-3 py-2.5 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                    <i class="fa-solid fa-right-from-bracket w-5 mr-3"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content p-4 sm:p-6 md:p-10 w-full overflow-y-auto">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-md" role="alert">
+                <p class="font-bold">Thành công!</p>
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+                <p class="font-bold">Lỗi!</p>
+                <p>@TempData["ErrorMessage"]</p>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <script>
+        // Script để làm nổi bật link menu đang active
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll("#sidebar-menu a.sidebar-link");
+
+            menuLinks.forEach(link => {
+                const linkPath = new URL(link.href).pathname;
+                // Kiểm tra nếu đường dẫn hiện tại bắt đầu bằng đường dẫn của link
+                // Điều này giúp giữ active cho mục cha (vd: /Admin/AdminProduct) khi đang ở trang con (vd: /Admin/AdminProduct/Create)
+                if (currentPath.startsWith(linkPath)) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,118 @@
+﻿@model Order
+@using Microsoft.AspNetCore.Http
+@using WebBanHangOnline.Extensions
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    var cart = HttpContextAccessor.HttpContext.Session.Get<List<CartItem>>("Cart") ?? new List<CartItem>();
+    decimal subTotal = cart.Sum(item => item.Total);
+    decimal shippingFee = subTotal > 0 ? 25000 : 0;
+    decimal total = subTotal + shippingFee;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>@ViewData["Title"] - FoodShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .field-validation-error {
+            color: #ef4444; /* text-red-500 */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <form asp-action="Confirm" method="post">
+        @Html.AntiForgeryToken()
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-6 flex flex-col md:flex-row gap-8">
+            <section class="bg-white rounded-lg shadow-lg p-6 flex-1">
+                <h2 class="text-xl font-semibold mb-6 flex items-center space-x-2 text-green-700">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>Thông tin giao hàng</span>
+                </h2>
+
+                <div asp-validation-summary="All" class="text-red-500 text-sm bg-red-50 p-3 rounded-md mb-4"></div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label asp-for="CustomerName" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                        <input asp-for="CustomerName" class="block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" placeholder="Nhập họ và tên đầy đủ" />
+                        <span asp-validation-for="CustomerName" class="field-validation-error"></span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="Email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input asp-for="Email" class="block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" placeholder="Nhập địa chỉ email" />
+                            <span asp-validation-for="Email" class="field-validation-error"></span>
+                        </div>
+                        <div>
+                            <label asp-for="PhoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" placeholder="Nhập số điện thoại" />
+                            <span asp-validation-for="PhoneNumber" class="field-validation-error"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label asp-for="Address" class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ giao hàng</label>
+                        <textarea asp-for="Address" class="block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-600" placeholder="Nhập địa chỉ đầy đủ (số nhà, đường, phường/xã,...)" rows="3"></textarea>
+                        <span asp-validation-for="Address" class="field-validation-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="bg-white rounded-lg shadow-lg p-6 w-full md:w-96 flex flex-col">
+                <h3 class="font-semibold text-gray-900 text-lg border-b border-gray-200 pb-4 mb-4">
+                    Tóm tắt đơn hàng
+                </h3>
+                <ul class="space-y-4 text-sm text-gray-700 flex-grow">
+                    @foreach (var item in cart)
+                    {
+                        <li class="flex items-center space-x-4">
+                            <div class="relative">
+                                <img alt="@item.ProductName" class="w-12 h-12 rounded-md object-cover" src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://placehold.co/100x100/EFEFEF/AAAAAA?text=Ảnh" : item.ImageUrl)" />
+                                <span class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">@item.Quantity</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-900">@item.ProductName</p>
+                            </div>
+                            <span class="font-semibold text-gray-900">@item.Total.ToString("N0")đ</span>
+                        </li>
+                    }
+                </ul>
+                <div class="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-700 space-y-2">
+                    <div class="flex justify-between">
+                        <span>Tạm tính:</span>
+                        <span class="font-semibold text-gray-900">@subTotal.ToString("N0")đ</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Phí vận chuyển:</span>
+                        <span class="font-semibold text-gray-900">@shippingFee.ToString("N0")đ</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 pt-4 mt-4 flex justify-between items-center text-lg font-semibold text-green-700">
+                    <span>Tổng cộng:</span>
+                    <span>@total.ToString("N0")đ</span>
+                </div>
+
+                <button type="submit" class="mt-6 w-full bg-green-600 text-white font-semibold py-3 rounded-md hover:bg-green-700 transition">
+                    Xác nhận và Đặt hàng
+                </button>
+                <p class="text-xs text-gray-400 text-center mt-2">
+                    Thông tin của bạn được bảo mật
+                </p>
+            </aside>
+        </main>
+    </form>
+</body>
+</html>

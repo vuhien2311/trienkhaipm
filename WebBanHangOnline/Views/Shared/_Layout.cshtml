@@ -1,0 +1,139 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using WebBanHangOnline.Models
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FoodShop</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a asp-controller="Home" asp-action="Index" class="flex-shrink-0 flex items-center gap-2">
+                        <i class="fa-solid fa-leaf text-2xl text-green-600"></i>
+                        <span class="font-bold text-xl text-gray-800">FoodShop</span>
+                    </a>
+
+                </div>
+
+                <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
+                    <div class="max-w-lg w-full lg:max-w-xs">
+                        <form asp-controller="Product" asp-action="List" method="get" class="relative">
+                            <input type="text" name="searchString" placeholder="Tìm kiếm sản phẩm..."
+                                   class="block w-full bg-gray-100 border border-gray-300 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                            <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 ml-4">
+                    <a asp-controller="Cart" asp-action="Index" class="text-gray-500 hover:text-green-600">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                    </a>
+                    <a asp-controller="Order" asp-action="MyOrders" class="text-gray-500 hover:text-green-600">
+                        <i class="fas fa-receipt text-lg"></i>
+                    </a>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="relative">
+                            <button id="user-menu-button" type="button" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <i class="fas fa-user-circle text-2xl text-gray-600"></i>
+                            </button>
+
+                            <div id="user-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10">
+                                <div class="py-1">
+                                    <div class="px-4 py-3">
+                                        <p class="text-sm">Đăng nhập với tên</p>
+                                        <p class="text-sm font-medium text-gray-900 truncate">@UserManager.GetUserName(User)</p>
+                                    </div>
+                                    <a asp-controller="Account" asp-action="Manage" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-user-cog w-5 mr-1"></i> Quản lý tài khoản
+                                    </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-area="Admin" asp-controller="Admin" asp-action="Dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-crown w-5 mr-1"></i> Trang quản trị
+                                        </a>
+                                    }
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="w-full">
+                                        <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-sign-out-alt w-5 mr-1"></i> Đăng xuất
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md">Đăng nhập</a>
+                        <a asp-controller="Account" asp-action="Register" class="ml-4 text-sm font-medium text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Đăng ký</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        @* Khu vực hiển thị thông báo từ TempData *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-md" role="alert">
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+                <p>@TempData["ErrorMessage"]</p>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    @* Di chuyển các script xuống cuối thẻ body *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('user-menu-button');
+            const userMenu = document.getElementById('user-menu');
+
+            if (menuButton && userMenu) {
+                menuButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', function(event) {
+                    const isClickInside = menuButton.contains(event.target) || userMenu.contains(event.target);
+                    if (!isClickInside) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

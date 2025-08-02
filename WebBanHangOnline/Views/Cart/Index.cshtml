@@ -1,0 +1,113 @@
+﻿@model List<CartItem>
+@using Microsoft.AspNetCore.Identity
+@using WebBanHangOnline.Models
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+@{
+    // Trang này sẽ không sử dụng layout chung để hiển thị giao diện Tailwind CSS mới
+    ViewData["Title"] = "Giỏ hàng";
+    decimal subTotal = Model.Sum(item => item.Total);
+    decimal shippingFee = subTotal > 0 ? 25000 : 0; // Giả sử phí ship là 25,000đ
+    decimal total = subTotal + shippingFee;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>@ViewData["Title"] - FoodShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex flex-col lg:flex-row gap-8">
+        @if (Model != null && Model.Any())
+        {
+            <!-- Cart Items -->
+            <section class="flex-1">
+                <h2 class="text-xl font-semibold mb-4 flex items-center space-x-2">
+                    <i class="fas fa-shopping-cart text-lg text-gray-700"></i>
+                    <span>Giỏ hàng của bạn</span>
+                </h2>
+                <ul class="space-y-4">
+                    @foreach (var item in Model)
+                    {
+                        <li class="flex border border-gray-200 bg-white rounded-lg p-4 items-center justify-between shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <img alt="@item.ProductName" class="w-16 h-16 object-cover rounded-md" src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://placehold.co/200x200/EFEFEF/AAAAAA?text=Ảnh" : item.ImageUrl)" />
+                                <div class="text-sm leading-tight">
+                                    <p class="font-semibold text-gray-900">@item.ProductName</p>
+                                    <p class="text-gray-600">@item.Price.ToString("N0")đ/sp</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <form asp-action="UpdateCart" method="post" class="flex items-center space-x-2">
+                                    <input type="hidden" name="id" value="@item.ProductId" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="w-16 border border-gray-300 rounded-md text-center text-sm py-1" onchange="this.form.submit()" />
+                                </form>
+                                <span class="text-sm font-semibold text-gray-900 w-24 text-right">@item.Total.ToString("N0")đ</span>
+                                <a asp-action="Remove" asp-route-id="@item.ProductId" title="Xóa sản phẩm" class="text-red-500 hover:text-red-700 text-lg">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <div class="mt-6">
+                    <a asp-controller="Home" asp-action="Index" class="w-full block text-center border border-gray-300 rounded-md py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                        &lt; Tiếp tục mua sắm
+                    </a>
+                </div>
+            </section>
+
+            <!-- Order Summary -->
+            <aside class="w-full lg:w-80">
+                <div class="border border-gray-200 bg-white rounded-lg p-4 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Tóm tắt đơn hàng</h3>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <div class="flex justify-between">
+                            <span>Tạm tính:</span>
+                            <span>@subTotal.ToString("N0")đ</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Phí vận chuyển:</span>
+                            <span>@shippingFee.ToString("N0")đ</span>
+                        </div>
+                        <hr class="my-2 border-gray-200" />
+                        <div class="flex justify-between font-semibold text-base text-gray-900">
+                            <span>Tổng cộng:</span>
+                            <span class="text-green-600">@total.ToString("N0")đ</span>
+                        </div>
+                    </div>
+                    <a asp-controller="Order" asp-action="Checkout" class="mt-4 w-full block text-center bg-green-600 text-white text-sm font-semibold py-2.5 rounded-md hover:bg-green-700 transition">
+                        Tiến hành thanh toán
+                    </a>
+                    <div class="mt-2 text-center text-gray-400 text-xs">
+                        <span>Thanh toán an toàn &amp; bảo mật</span>
+                    </div>
+                </div>
+            </aside>
+        }
+        else
+        {
+            <div class="w-full bg-white border border-gray-200 rounded-lg p-8 text-center shadow-sm">
+                <i class="fas fa-shopping-cart fa-3x text-gray-300 mb-4"></i>
+                <h2 class="text-xl font-semibold text-gray-700">Giỏ hàng của bạn đang trống</h2>
+                <p class="text-gray-500 mt-2">Hãy quay lại trang chủ và chọn cho mình những sản phẩm tươi ngon nhé!</p>
+                <a asp-controller="Home" asp-action="Index" class="mt-6 inline-block bg-green-600 text-white font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition">
+                    Quay lại trang chủ
+                </a>
+            </div>
+        }
+    </main>
+</body>
+</html>

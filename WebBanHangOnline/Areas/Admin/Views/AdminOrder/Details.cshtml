@@ -1,0 +1,95 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng #" + Model.Id;
+}
+
+<div class="flex justify-between items-center mb-4">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+        <p class="text-sm text-gray-600 mt-1">Xem lại thông tin và cập nhật trạng thái đơn hàng.</p>
+    </div>
+    <a asp-action="Index" class="text-sm border border-gray-300 rounded-md px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Quay lại danh sách</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Order Details -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4 border-b pb-3">Sản phẩm trong đơn hàng</h3>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-600">
+                        <th class="py-2">Sản phẩm</th>
+                        <th class="py-2 text-center">Số lượng</th>
+                        <th class="py-2 text-right">Đơn giá</th>
+                        <th class="py-2 text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in Model.OrderDetails)
+                    {
+                        <tr class="border-b">
+                            <td class="py-3">
+                                <div class="flex items-center gap-3">
+                                    <img src="@(string.IsNullOrEmpty(detail.Product.ImageUrl) ? "https://placehold.co/100x100/EFEFEF/AAAAAA?text=Ảnh" : detail.Product.ImageUrl)" class="w-12 h-12 rounded-md object-cover" />
+                                    <span>@detail.Product.Name</span>
+                                </div>
+                            </td>
+                            <td class="py-3 text-center">x @detail.Quantity</td>
+                            <td class="py-3 text-right">@detail.Price.ToString("N0")đ</td>
+                            <td class="py-3 text-right font-semibold">@((detail.Quantity * detail.Price).ToString("N0"))đ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4 border-b pb-3">Thông tin khách hàng</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><strong>Tên khách hàng:</strong> @Model.CustomerName</div>
+                <div><strong>Số điện thoại:</strong> @Model.PhoneNumber</div>
+                <div><strong>Email:</strong> @Model.Email</div>
+                <div><strong>Địa chỉ giao hàng:</strong> @Model.Address</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 class="font-semibold text-lg text-gray-800">Tóm tắt</h3>
+            <div class="text-sm space-y-2">
+                <div class="flex justify-between">
+                    <span>Ngày đặt:</span>
+                    <span>@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="flex justify-between font-semibold text-lg border-t pt-2 mt-2">
+                    <span>Tổng tiền:</span>
+                    <span class="text-green-600">@Model.TotalAmount.ToString("N0")đ</span>
+                </div>
+            </div>
+
+            <form asp-action="UpdateStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="mt-6">
+                    <label for="status" class="block text-sm font-medium text-gray-700">Cập nhật trạng thái</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <select name="status" class="block w-full rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <option value="Chờ xử lý" selected="@(Model.Status == "Chờ xử lý")">Chờ xử lý</option>
+                            <option value="Đang giao" selected="@(Model.Status == "Đang giao")">Đang giao</option>
+                            <option value="Hoàn thành" selected="@(Model.Status == "Hoàn thành")">Hoàn thành</option>
+                            <option value="Đã hủy" selected="@(Model.Status == "Đã hủy")">Đã hủy</option>
+                        </select>
+                        <button type="submit" class="relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <span>Lưu</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

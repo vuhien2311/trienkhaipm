@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Dịch vụ ứng dụng WebBanHangOnline
+  app:
+    build:
+      context: ./WebBanHangOnline
+      dockerfile: Dockerfile
+    container_name: webbanhang_app
+    ports:
+      - "8003:8083" # HTTP
+      - "8004:8084" # HTTPS
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=WebBanHangOnlineDB;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ASPNETCORE_URLS=https://+:8084;http://+:8083
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${PFX_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      # Cấu hình MinIO cho ứng dụng
+      - Minio__Endpoint=minio:9000
+      - Minio__AccessKey=${MINIO_ROOT_USER}
+      - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - C:\Users\Admin\.aspnet\https/aspnetapp.pfx:/https/aspnetapp.pfx:ro
+    depends_on:
+      - db
+      - minio
+
+  # Dịch vụ cơ sở dữ liệu
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: webbanhang_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+  # Dịch vụ lưu trữ ảnh MinIO
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # API port
+      - "9001:9001" # Console UI port
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+
+  # Dịch vụ giám sát Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9092:9090"
+
+  # Dịch vụ trực quan hóa Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  mssql-data:
+  minio-data:
+  grafana-data:

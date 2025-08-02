@@ -1,0 +1,39 @@
+﻿@* Lưu ý: Để View này hoạt động, bạn cần thêm một Action GET("Delete") trong AdminUserController *@
+@model User
+@{
+    ViewData["Title"] = "Xác nhận xóa người dùng";
+}
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+        <p class="text-sm text-red-600 mt-2">Bạn có chắc chắn muốn xóa vĩnh viễn người dùng này? Tất cả đơn hàng và thông tin liên quan của họ sẽ không bị xóa nhưng có thể không còn liên kết.</p>
+
+        <div class="mt-6 border-t border-gray-200 pt-6">
+            <dl class="text-sm">
+                <div class="grid grid-cols-3 gap-4 py-2">
+                    <dt class="font-medium text-gray-500">Tên đăng nhập</dt>
+                    <dd class="col-span-2 text-gray-900 font-semibold">@Model.UserName</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 py-2">
+                    <dt class="font-medium text-gray-500">Họ và tên</dt>
+                    <dd class="col-span-2 text-gray-900">@Model.FullName</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 py-2">
+                    <dt class="font-medium text-gray-500">Email</dt>
+                    <dd class="col-span-2 text-gray-900">@Model.Email</dd>
+                </div>
+            </dl>
+        </div>
+
+        <form asp-action="Delete" method="post" class="mt-6 flex justify-end gap-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <a asp-action="Index" class="text-sm border border-gray-300 rounded-md px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Hủy bỏ</a>
+            <button type="submit" class="text-sm bg-red-600 text-white font-semibold rounded-md px-4 py-2 hover:bg-red-700 transition flex items-center gap-2">
+                <i class="fas fa-trash"></i>
+                <span>Xác nhận xóa</span>
+            </button>
+        </form>
+    </div>
+</div>

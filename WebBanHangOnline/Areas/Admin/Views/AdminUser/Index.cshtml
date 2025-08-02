@@ -1,0 +1,49 @@
+﻿@model IEnumerable<dynamic>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+            <p class="text-sm text-gray-600 mt-1">Xem và quản lý tài khoản người dùng.</p>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Người dùng</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Tên đăng nhập</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Vai trò</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700 text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    User user = item.User;
+                    IList<string> roles = item.Roles;
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="py-3 px-4">
+                            <div class="font-semibold text-gray-900">@user.FullName</div>
+                            <div class="text-gray-500 text-xs">@user.Email</div>
+                        </td>
+                        <td class="py-3 px-4 text-gray-600">@user.UserName</td>
+                        <td class="py-3 px-4 text-gray-600">@string.Join(", ", roles)</td>
+                        <td class="py-3 px-4 text-center space-x-4">
+                            <a asp-action="Edit" asp-route-id="@user.Id" class="text-indigo-600 hover:text-indigo-900" title="Chỉnh sửa vai trò">
+                                <i class="fas fa-pen-to-square"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@user.Id" class="text-red-600 hover:text-red-900" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

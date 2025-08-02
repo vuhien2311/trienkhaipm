@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webbanhang-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webbanhang-app
+  template:
+    metadata:
+      labels:
+        app: webbanhang-app
+    spec:
+      containers:
+        - name: webbanhang-app
+          image: vuhien23/webbanhangonline:latest
+          ports:
+            # Giữ lại cả hai cổng vì chúng ta sẽ cấu hình Kestrel để xử lý cả HTTP và HTTPS
+            - containerPort: 8083
+            - containerPort: 8084
+          env:
+            # --- Các biến môi trường hiện có ---
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server=webbanhang-db-service;Database=WebBanHangOnlineDB;User Id=sa;Password=$(SA_PASSWORD);TrustServerCertificate=True"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: webbanhang-secrets
+                  key: sa_password
+            - name: Minio__Endpoint
+              value: "minio-headless:9000"
+            - name: Minio__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: webbanhang-secrets
+                  key: minio_access_key
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: webbanhang-secrets
+                  key: minio_secret_key
+            - name: Minio__PublicEndpoint
+              valueFrom:
+                secretKeyRef:
+                  name: webbanhang-secrets
+                  key: minio_public_endpoint
+
+            # --- SỬA LỖI: Thêm các biến môi trường để Kestrel tìm thấy chứng chỉ ---
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+              value: /https/aspnetapp.pfx
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+              valueFrom:
+                secretKeyRef:
+                  # Secret này sẽ được tạo ở bước tiếp theo
+                  name: tls-certificate
+                  key: password
+
+          # --- SỬA LỖI: Mount volume chứa chứng chỉ vào container ---
+          volumeMounts:
+            - name: https-cert
+              mountPath: /https
+              readOnly: true
+
+      # --- SỬA LỖI: Định nghĩa volume để lấy dữ liệu từ Secret ---
+      volumes:
+        - name: https-cert
+          secret:
+            secretName: tls-certificate
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webbanhang-app-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: webbanhang-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 83
+      targetPort: 8083
+    # Thêm cổng HTTPS để có thể truy cập từ bên ngoài
+    - name: https
+      protocol: TCP
+      port: 84
+      targetPort: 8084
