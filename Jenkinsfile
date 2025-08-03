@@ -2,6 +2,7 @@ pipeline {
     // --- THAY ĐỔI BẮT ĐẦU TỪ ĐÂY ---
     agent {
         docker {
+            label 'master' // <-- TÔI ĐÃ THÊM DÒNG NÀY ĐỂ SỬA LỖI
             // Image này chứa .NET SDK để build và test code của bạn
             image 'mcr.microsoft.com/dotnet/sdk:6.0' 
             // Dòng quan trọng: Kết nối agent vào mạng của Minikube
