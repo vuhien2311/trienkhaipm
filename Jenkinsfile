@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIALS_ID = 'WebBanHangOnline'
-        DOCKER_IMAGE_NAME = "hduy1405/webbanhangonline" 
+        DOCKER_IMAGE_NAME = "vuhien23/webbanhangonline" 
         SOLUTION_NAME = "WebBanHangOnline.sln"
         PROJECT_NAME = "WebBanHangOnline.csproj"
 	KUBECONFIG_CREDENTIAL_ID = 'KubeConfigID'
