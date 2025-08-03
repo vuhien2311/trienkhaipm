@@ -1,22 +1,23 @@
 pipeline {
-    // --- THAY ĐỔI BẮT ĐẦU TỪ ĐÂY ---
+    // --- THAY ĐỔI DUY NHẤT NẰM Ở ĐÂY ---
     agent {
         docker {
-            label 'master' // <-- TÔI ĐÃ THÊM DÒNG NÀY ĐỂ SỬA LỖI
-            // Image này chứa .NET SDK để build và test code của bạn
+            // Chạy pipeline trên một agent có thể dùng lại workspace
+            reuseNode true 
+            // Image này chứa .NET SDK để build và test code
             image 'mcr.microsoft.com/dotnet/sdk:6.0' 
-            // Dòng quan trọng: Kết nối agent vào mạng của Minikube
+            // Kết nối agent vào mạng của Minikube để giải quyết lỗi timeout
             args '--network minikube'
         }
     }
-    // --- THAY ĐỔI KẾT THÚC TẠI ĐÂY ---
+    // --- CÁC NỘI DUNG CÒN LẠI GIỮ NGUYÊN ---
 
     environment {
         DOCKER_HUB_CREDENTIALS_ID = 'WebBanHangOnline'
         DOCKER_IMAGE_NAME = "vuhien23/webbanhangonline" 
         SOLUTION_NAME = "WebBanHangOnline.sln"
         PROJECT_NAME = "WebBanHangOnline.csproj"
-        KUBECONFIG_CREDENTIAL_ID = 'KubeConfigID'
+	    KUBECONFIG_CREDENTIAL_ID = 'KubeConfigID'
     }
 
     stages {
@@ -65,7 +66,7 @@ pipeline {
         }
 
 
-        stage('Deploy with Docker Compose') {
+	    stage('Deploy with Docker Compose') {
             steps {
                 echo 'Deploying services using Docker Compose...'
                 bat 'docker-compose down'
@@ -78,7 +79,7 @@ pipeline {
             steps {
                 withKubeConfig(credentialsId: KUBECONFIG_CREDENTIAL_ID) {
                     bat 'kubectl apply -f secret.yml'
-                    bat 'kubectl apply -f tls-certificate.yml'
+		            bat 'kubectl apply -f tls-certificate.yml'
                     bat 'kubectl apply -f db-deployment.yml'
                     bat 'kubectl apply -f minio-deployment.yml'
                     bat 'kubectl apply -f app-deployment.yml'
