@@ -1,12 +1,21 @@
 pipeline {
-    agent any
+    // --- THAY ĐỔI BẮT ĐẦU TỪ ĐÂY ---
+    agent {
+        docker {
+            // Image này chứa .NET SDK để build và test code của bạn
+            image 'mcr.microsoft.com/dotnet/sdk:6.0' 
+            // Dòng quan trọng: Kết nối agent vào mạng của Minikube
+            args '--network minikube'
+        }
+    }
+    // --- THAY ĐỔI KẾT THÚC TẠI ĐÂY ---
 
     environment {
         DOCKER_HUB_CREDENTIALS_ID = 'WebBanHangOnline'
         DOCKER_IMAGE_NAME = "vuhien23/webbanhangonline" 
         SOLUTION_NAME = "WebBanHangOnline.sln"
         PROJECT_NAME = "WebBanHangOnline.csproj"
-	KUBECONFIG_CREDENTIAL_ID = 'KubeConfigID'
+        KUBECONFIG_CREDENTIAL_ID = 'KubeConfigID'
     }
 
     stages {
@@ -43,19 +52,19 @@ pipeline {
             steps {
                 script {
                     dir('WebBanHangOnline') {
-                         def customImage = docker.build(DOCKER_IMAGE_NAME, ".")
+                        def customImage = docker.build(DOCKER_IMAGE_NAME, ".")
 
-                         docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS_ID) {
-                             customImage.push("${env.BUILD_NUMBER}")
-                             customImage.push("latest")
-                         }
+                        docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS_ID) {
+                            customImage.push("${env.BUILD_NUMBER}")
+                            customImage.push("latest")
+                        }
                     }
                 }
             }
         }
 
 
-	stage('Deploy with Docker Compose') {
+        stage('Deploy with Docker Compose') {
             steps {
                 echo 'Deploying services using Docker Compose...'
                 bat 'docker-compose down'
@@ -68,15 +77,11 @@ pipeline {
             steps {
                 withKubeConfig(credentialsId: KUBECONFIG_CREDENTIAL_ID) {
                     bat 'kubectl apply -f secret.yml'
-		    bat 'kubectl apply -f tls-certificate.yml'
+                    bat 'kubectl apply -f tls-certificate.yml'
                     bat 'kubectl apply -f db-deployment.yml'
                     bat 'kubectl apply -f minio-deployment.yml'
-
                     bat 'kubectl apply -f app-deployment.yml'
-
                     bat "kubectl set image deployment/webbanhang-app webbanhang-app=${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    
-                    
                 }
             }
         }
